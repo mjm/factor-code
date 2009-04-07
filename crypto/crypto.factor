@@ -1,7 +1,7 @@
 ! Copyright (C) 2009 Matt Moriarity.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors byte-arrays kernel math sequences sequences.repeating
-;
+USING: accessors byte-arrays io.encodings.binary io.files kernel math
+sequences sequences.repeating ;
 IN: crypto
 
 MIXIN: cipher
@@ -10,11 +10,20 @@ GENERIC: encode ( in-bytes cipher -- out-bytes )
 GENERIC: decode ( in-bytes cipher -- out-bytes )
 GENERIC: reverse-cipher ( encoder -- decoder )
 
-GENERIC: encode-file ( in-path out-path cipher -- )
-GENERIC: decode-file ( in-path out-path cipher -- )
+GENERIC: encode-file ( out-path in-path cipher -- )
+GENERIC: decode-file ( out-path in-path cipher -- )
 
 M: cipher decode
     reverse-cipher encode ;
+
+: change-file ( out-path in-path quot -- )
+    [ binary file-contents ] dip call swap binary set-file-contents ; inline
+
+M: cipher encode-file
+    [ encode ] curry change-file ;
+
+M: cipher decode-file
+    [ decode ] curry change-file ;
 
 TUPLE: caesar-cipher { key integer } ;
 C: <caesar-cipher> caesar-cipher
