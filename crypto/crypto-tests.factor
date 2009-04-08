@@ -38,7 +38,13 @@ USING: byte-arrays crypto tools.test ;
 ! vernam encoding test
 [ B{ 5 7 5 } ]
 [ B{ 1 2 3 } B{ 4 5 6 } <vernam-cipher> encode ] unit-test
+[ B{ 5 7 5 } ]
+[ B{ 1 2 3 } B{ 4 5 6 9 } <vernam-cipher> encode ] unit-test
+[ B{ 1 2 3 } B{ 4 5 } <vernam-cipher> encode ] must-fail
 
 ! vernam decoding test
 [ B{ 1 2 3 } ]
 [ B{ 5 7 5 } B{ 4 5 6 } <vernam-cipher> decode ] unit-test
+[ B{ 1 2 3 } ]
+[ B{ 5 7 5 } B{ 4 5 6 9 } <vernam-cipher> decode ] unit-test
+[ B{ 5 7 5 } B{ 4 5 } <vernam-cipher> decode ] must-fail

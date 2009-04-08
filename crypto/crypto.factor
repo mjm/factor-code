@@ -1,7 +1,7 @@
 ! Copyright (C) 2009 Matt Moriarity.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors byte-arrays io.encodings.binary io.files kernel math
-sequences sequences.repeating ;
+random sequences sequences.repeating ;
 IN: crypto
 
 MIXIN: cipher
@@ -30,7 +30,7 @@ C: <caesar-cipher> caesar-cipher
 INSTANCE: caesar-cipher cipher
 
 : shift ( n byte -- byte )
-    + 256 mod dup 0 < [ 256 + ] [ ] if ;
+    + 256 mod dup 0 < [ 256 + ] when ;
 
 M: caesar-cipher encode
     key>> swap [ dupd shift ] map nip ;
@@ -52,7 +52,15 @@ TUPLE: vernam-cipher { key byte-array } ;
 C: <vernam-cipher> vernam-cipher
 INSTANCE: vernam-cipher cipher
 
+ERROR: short-pad ;
+
+: check-pad-length ( message pad -- )
+    [ length ] bi@ > [ short-pad ] when ;
+
 M: vernam-cipher encode
-    key>> [ bitxor ] 2map ;
+    key>> 2dup check-pad-length [ bitxor ] 2map ;
 
 M: vernam-cipher reverse-cipher ;
+
+: vernam-pad ( n -- bytes )
+    random-bytes >byte-array ;
