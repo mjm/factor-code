@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+
+<t:chloe xmlns:t="http://factorcode.org/chloe/1.0">
+  <html>
+    <head><title>Cryptography</title></head>
+    <body>
+      <h1>(en|de)crypt your text</h1>
+      <t:form t:action="$crypto-app/process">
+        <p><t:textarea t:name="message"/></p>
+        <p>
+          <t:choice t:name="cipher" t:choices="ciphers" />
+          Key: <t:field t:name="key"/>
+        </p>
+        <p>
+          <input type="submit" name="act" value="encode"/>
+          <input type="submit" name="act" value="decode"/>
+        </p>
+      </t:form>
+    </body>
+  </html>
+</t:chloe>
