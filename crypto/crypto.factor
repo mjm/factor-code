@@ -1,7 +1,7 @@
 ! Copyright (C) 2009 Matt Moriarity.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors byte-arrays io.encodings.binary io.files kernel math
-random sequences sequences.repeating ;
+USING: accessors arrays byte-arrays io.encodings.binary io.files
+kernel math math.order random sequences sequences.repeating sorting ;
 IN: crypto
 
 MIXIN: cipher
@@ -64,3 +64,37 @@ M: vernam-cipher reverse-cipher ;
 
 : vernam-pad ( n -- bytes )
     random-bytes >byte-array ;
+
+! cracking the caesar cipher
+
+: sum ( seq -- number )
+    0 [ + ] reduce ;
+
+: freq-table ( bytes -- freq-table )
+    256 0 <array> [ dupd swap [ 1 + ] change-nth ] reduce ;
+
+: normalize ( freq-table -- freq-table' )
+    dup sum >float [ / ] curry map ;
+
+: corpus ( path -- freq-table )
+    binary file-contents freq-table normalize ;
+
+: table ( bytes -- freq-table )
+    freq-table normalize ;
+
+TUPLE: guess { cipher caesar-cipher initial: f } { quality float } ;
+
+: <guess> ( shift quality -- guess )
+    [ <caesar-cipher> ] dip guess boa ;
+
+: shift-seq ( seq shift -- seq' )
+    cut-slice swap append ;
+
+: create-guess ( shift corpus freqs -- guess )
+    [ dup ] 2dip rot shift-seq [ - abs ] 2map sum <guess> ;
+
+: sort-guesses ( guesses -- guesses' )
+    [ [ quality>> ] bi@ <=> ] sort ;
+
+: caesar-guesses ( corpus encoded -- guesses )
+    table [ create-guess ] 2curry 256 swap map sort-guesses ;
