@@ -25,20 +25,20 @@ IN: math-project
 : identity ( size -- matrix )
     dup [ = [ 1.0 ] [ 0.0 ] if ] gen-matrix ;
 
-: M+ ( matrix matrix -- matrix' )
-    [ Mrows ] bi@ [ V+ ] 2map >double-blas-matrix ;
+! : M+ ( matrix matrix -- matrix' )
+!     [ Mrows ] bi@ [ V+ ] 2map >double-blas-matrix ;
 
-: M- ( matrix matrix -- matrix' )
-    [ Mrows ] bi@ [ V- ] 2map >double-blas-matrix ;
+! : M- ( matrix matrix -- matrix' )
+!     [ Mrows ] bi@ [ V- ] 2map >double-blas-matrix ;
 
-: Vnormalize ( vector -- vector' )
-    dup Vnorm V/n ;
+! : Vnormalize ( vector -- vector' )
+!     dup Vnorm V/n ;
 
 : householder ( vector -- matrix )
     [ length identity ] keep [ 2.0 ] dip hh-vector Vnormalize dup n*V(*)V M- ;
 
-: Mnth ( i j matrix -- number )
-    Mrows [ swap ] dip nth nth ;
+! : Mnth ( i j matrix -- number )
+!     Mrows [ swap ] dip nth nth ;
 
 :: (hh-pad) ( size start matrix -- matrix )
     size size [  ] gen-matrix ;
