@@ -53,9 +53,6 @@ IN: math-project
 : ~= ( a b -- ? )
     0.00000001 ~ ;
 
-! : ones ( exemplar -- vector )
-!     length 1.0 <array> >double-blas-vector ;
-
 : fix-pivot-row ( A i pivot -- A i )
     recip [ 2dup ] dip spin Mrows nth n*V! drop ;
 
