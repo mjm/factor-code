@@ -1,9 +1,24 @@
 ! Copyright (C) 2009 Your name.
 ! See http://factorcode.org/license.txt for BSD license.
-USING: accessors arrays kernel locals math math.blas.matrices
-math.blas.vectors math.functions sequences ;
+USING: arrays kernel locals math math.blas.matrices math.blas.vectors
+math.functions math.ranges sequences tools.time ;
 IN: math-project
 
+: bench ( quot -- )
+    [ 1000 swap times ] time ; inline
+
+: cross-2each ( seq1 seq2 quot -- )
+    [ with each ] 2curry each ; inline
+
+! :: (gen-matrix) ( matrix quot i j -- matrix quot )
+!     i j quot call i j matrix Mset-nth matrix quot ;
+
+! : gen-matrix ( rows cols quot -- matrix )
+!     [ [ dmatrix{ { } } <empty-matrix> ] 2keep ] dip -rot [ (gen-matrix) ] cross-2each drop ;
+
+! :: Mchange-nth ( matrix quot i j -- matrix quot )
+!     i j quot call i j matrix Mset-nth matrix quot ; inline
+ 
 :: gen-matrix ( rows cols quot -- matrix )
     rows cols [ swap [ quot call ] curry map ] curry map >double-blas-matrix ;
 
@@ -25,23 +40,24 @@ IN: math-project
 : identity ( size -- matrix )
     dup [ = [ 1.0 ] [ 0.0 ] if ] gen-matrix ;
 
-! : M+ ( matrix matrix -- matrix' )
-!     [ Mrows ] bi@ [ V+ ] 2map >double-blas-matrix ;
-
-! : M- ( matrix matrix -- matrix' )
-!     [ Mrows ] bi@ [ V- ] 2map >double-blas-matrix ;
-
-! : Vnormalize ( vector -- vector' )
-!     dup Vnorm V/n ;
-
 : householder ( vector -- matrix )
     [ length identity ] keep [ 2.0 ] dip hh-vector Vnormalize dup n*V(*)V M- ;
 
-! : Mnth ( i j matrix -- number )
-!     Mrows [ swap ] dip nth nth ;
-
+! later: see if this can be done easily without locals
 :: (hh-pad) ( size start matrix -- matrix )
-    size size [  ] gen-matrix ;
+    size identity size start - dup [| i j |
+        dup [ i j matrix Mnth i start + j start + ] dip Mset-nth
+    ] cross-2each ;
 
 : hh-pad ( size matrix -- matrix )
-    [ rows>> ] keep [ dupd - ] dip (hh-pad) ;
+    [ Mheight ] keep [ dupd - ] dip (hh-pad) ;
+
+: sub-matrix ( matrix start -- matrix )
+    [ dup Mheight ] dip [ - dup ] keep dup Msub ;
+
+: hh-reduce ( R Q i -- R Q )
+    pick swap sub-matrix Mcols first householder over Mheight swap hh-pad
+    tuck M. spin M. swap ;
+
+: QR-householder ( A -- Q R )
+    dup [ Mheight identity ] [ Mheight ] bi 1 [a,b) [ hh-reduce ] each swap ;
