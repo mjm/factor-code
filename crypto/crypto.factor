@@ -1,7 +1,8 @@
 ! Copyright (C) 2009 Matt Moriarity.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors arrays byte-arrays io.encodings.binary io.files
-kernel math math.order random sequences sequences.repeating sorting ;
+kernel math math.order random sequences sequences.repeating sorting
+strings ;
 IN: crypto
 
 MIXIN: cipher
@@ -98,3 +99,6 @@ TUPLE: guess { cipher caesar-cipher initial: f } { quality float } ;
 
 : caesar-guesses ( corpus encoded -- guesses )
     table [ create-guess ] 2curry 256 swap map sort-guesses ;
+
+: test-strings ( guesses encoded -- seq )
+    50 head [ swap cipher>> decode >string ] curry map ;
