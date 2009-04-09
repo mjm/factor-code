@@ -9,15 +9,6 @@ IN: math-project
 
 : cross-2each ( seq1 seq2 quot -- )
     [ with each ] 2curry each ; inline
-
-! :: (gen-matrix) ( matrix quot i j -- matrix quot )
-!     i j quot call i j matrix Mset-nth matrix quot ;
-
-! : gen-matrix ( rows cols quot -- matrix )
-!     [ [ dmatrix{ { } } <empty-matrix> ] 2keep ] dip -rot [ (gen-matrix) ] cross-2each drop ;
-
-! :: Mchange-nth ( matrix quot i j -- matrix quot )
-!     i j quot call i j matrix Mset-nth matrix quot ; inline
  
 :: gen-matrix ( rows cols quot -- matrix )
     rows cols [ swap [ quot call ] curry map ] curry map >double-blas-matrix ; inline
@@ -27,13 +18,6 @@ IN: math-project
 
 : input-vector ( size -- vector )
     0.1 over 3 / ^ <array> >double-blas-vector ;
-
-: e1 ( size -- vector )
-    1- 0 <array> 1.0 1array swap append >double-blas-vector ;
-
-! Below implementation is faster
-! : hh-vector ( vector -- vector' )
-!     dup [ Vnorm ] [ first sgn ] [ length e1 ] tri n*V! n*V! V+ ;
 
 : hh-vector ( vector -- vector' )
     clone 0 over dup Vnorm [ + ] curry change-nth ;
