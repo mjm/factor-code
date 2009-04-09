@@ -20,7 +20,7 @@ IN: math-project
 !     i j quot call i j matrix Mset-nth matrix quot ; inline
  
 :: gen-matrix ( rows cols quot -- matrix )
-    rows cols [ swap [ quot call ] curry map ] curry map >double-blas-matrix ;
+    rows cols [ swap [ quot call ] curry map ] curry map >double-blas-matrix ; inline
 
 : input-matrix ( size -- matrix )
     dup [ [ 1+ ] bi@ 1- + 1 swap / ] gen-matrix ;
@@ -31,6 +31,7 @@ IN: math-project
 : e1 ( size -- vector )
     1- 0 <array> 1.0 1array swap append >double-blas-vector ;
 
+! Below implementation is faster
 ! : hh-vector ( vector -- vector' )
 !     dup [ Vnorm ] [ first sgn ] [ length e1 ] tri n*V! n*V! V+ ;
 
