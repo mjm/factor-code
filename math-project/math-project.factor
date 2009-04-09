@@ -62,3 +62,37 @@ IN: math-project
 
 : QR-householder ( A -- Q R )
     dup [ Mheight identity ] [ Mheight ] bi 1 [a,b) [ hh-reduce ] each swap ;
+
+: pivot ( A i -- A i pivot )
+    2dup dup spin Mnth ;
+
+: ~= ( a b -- ? )
+    0.00000001 ~ ;
+
+! : ones ( exemplar -- vector )
+!     length 1.0 <array> >double-blas-vector ;
+
+: fix-pivot-row ( A i pivot -- A i )
+    recip [ 2dup ] dip spin Mrows nth n*V! drop ;
+
+: eliminate-cell ( vec i pivot-vec -- )
+    -rot over nth neg -rot n*V+V! drop ;
+
+: (eliminate-column) ( A i -- )
+    swap dupd [ Mrows swap head ] [ Mrows nth ] 2bi swapd
+    [ eliminate-cell ] 2curry each ;
+
+: eliminate-column ( A pivot -- A' )
+    pivot dup 0 ~= [ 2drop ] [ fix-pivot-row dupd (eliminate-column) ] if ;
+
+: back-sub ( matrix -- matrix )
+    dup Mheight 0 (a,b] [ eliminate-column ] each ;
+
+: augmentV ( A b -- A|b )
+    [ Mcols ] dip suffix >double-blas-matrix Mtranspose ;
+
+: solution ( A -- x )
+    Mcols peek ;
+
+: solve-QR ( Q R b -- x )
+    [ swap Mtranspose ] dip M.V augmentV back-sub solution ;
